@@ -1,6 +1,8 @@
 import json
 import time
+import os
 
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
 import chat_service
@@ -8,7 +10,8 @@ import chat_service
 app = Flask(__name__)
 cors = CORS(app)
 chat_res = chat_service.chatbot_service()
-
+load_dotenv()
+os.environ['OPENAI_API_KEY']
 @app.route('/', methods=["GET"])
 def chat():
 
