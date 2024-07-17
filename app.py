@@ -24,6 +24,8 @@ def chat_rag():
     user_message = request.json
     start = time.time()
     response_message = generate_bot_response(user_message, 'chat')
+    print(f"user_message: {user_message}")
+    print(f"response_message: {response_message}")
 
     print(f"답변시간 : {time.time() - start:.5f} sec")
 
