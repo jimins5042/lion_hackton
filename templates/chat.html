@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Example</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .messages-container {
+            max-height: 500px;
+            min-height: 500px; /* 채팅창 최소 높이 설정 */
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .user-message {
+            background-color: #f2f2f2;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #dff6fc;
+            text-align: left;
+        }
+
+        .input-container {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f2f2f2;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        #send-button {
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet"/>
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+
+<div class="chat-container">
+
+    <div class="messages-container" id="messages-container">
+
+        <!-- 채팅 메시지를 출력할 빈 div -->
+
+    </div>
+    <div class="input-container">
+        <input type="text" id="user-input" placeholder="Type your message..." onkeydown="handleInputKeyPress(event)">
+        <button id="send-button">Send</button>
+    </div>
+</div>
+
+<!-- Bootstrap core JS-->
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<!-- Core theme JS-->
+<script th:src="@{/js/scripts.js}"></script>
+
+<script th:inline="javascript">
+    const sendButton = document.getElementById("send-button");
+    const userInput = document.getElementById("user-input");
+    const messagesContainer = document.getElementById("messages-container");
+    const btn = document.getElementById("messages-container");
+
+    // 기본 메시지를 화면에 추가하는 함수
+    function displayBotMessage(message) {
+        const botMessageElement = document.createElement("div");
+        botMessageElement.classList.add("chat-message", "bot-message");
+        botMessageElement.textContent = message;
+        messagesContainer.appendChild(show);
+    }
+
+    // 페이지가 로드되었을 때 기본 메시지를 추가
+    window.addEventListener('load', () => {
+        const defaultMessages = ["안녕하세요! 멍상에 오신걸 환영해요.",
+            "오늘은 어떤 일이 있었나요? 그리고 무슨 기분이였나요?\n" +
+            "무엇이든 이야기 해주세요^^."];
+
+        defaultMessages.forEach(message => {
+            displayBotMessageWithLineBreak(message);
+        });
+        scrollToBottom(messagesContainer);
+    });
+
+
+    sendButton.addEventListener("click", async () => {
+
+        const userMessage = userInput.value;
+
+        if (userMessage === "!구매") {
+            window.location.href = "http://localhost:8080/purchase";
+        } else if (userMessage === "!다시") {
+            window.location.href = "http://localhost:8080/chat";
+        } else if (userMessage === "!공유") {
+            window.location.href = "http://localhost:8080/shareSns";
+        } else {
+            displayUserMessage(userMessage);
+            scrollToBottom(messagesContainer);
+            fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(userMessage),
+            })
+                .then(response => response.text())
+                .then(data => {
+                    // 새로운 메시지를 화면에 추가
+                    const botMessageElement = document.createElement("div");
+                    botMessageElement.classList.add("chat-message", "bot-message");
+                    botMessageElement.innerHTML = data; // innerHTML을 사용하여 HTML 태그 인식
+                    messagesContainer.appendChild(botMessageElement);
+
+                    scrollToBottom(messagesContainer);
+                });
+        }
+    });
+
+
+    function displayBotMessageWithLineBreak(message) {
+        const botMessageElement = document.createElement("div");
+        botMessageElement.classList.add("chat-message", "bot-message");
+        botMessageElement.innerHTML = message; // innerHTML을 사용하여 HTML 태그 인식
+        messagesContainer.appendChild(botMessageElement);
+    }
+
+    function displayUserMessage(message) {
+        const userMessageElement = document.createElement("div");
+        userMessageElement.classList.add("chat-message", "user-message");
+        userMessageElement.textContent = message;
+        messagesContainer.appendChild(userMessageElement);
+        userInput.value = "";
+    }
+
+    function scrollToBottom(element) {
+        element.scrollTop = element.scrollHeight;
+    }
+
+    function handleInputKeyPress(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // 기본 엔터 동작 방지
+            sendButton.click(); // send 버튼 클릭
+        }
+    }
+
+</script>
+
+</body>
+</html>
