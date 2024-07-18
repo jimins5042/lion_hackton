@@ -71,7 +71,7 @@ class chatbot_service:
             def process_doc(doc):
                 return map_chain.invoke({"context": doc.page_content, "question": question}).content
 
-            with concurrent.futures.ThreadPoolExecutor() as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 results = list(executor.map(process_doc, documents))
 
             return "\n\n".join(results)
